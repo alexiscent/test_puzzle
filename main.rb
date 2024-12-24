@@ -9,6 +9,21 @@ class Puzzle
       h
     end
   end
+  
+  def solve
+    longest_chain = []
+    @items.values.flatten.each do |item|
+      current_chain = dfs item
+      longest_chain = current_chain if current_chain.size > longest_chain.size
+    end
+    p longest_chain
+  end
+  
+  private
+
+  def dfs(node, visited = [])
+    []
+  end
 end
 
 class Node 
@@ -24,3 +39,4 @@ end
 filename = "source.txt"
 numbers = File.readlines(filename, chomp: true)
 puzzle = Puzzle.new numbers
+puzzle.solve
