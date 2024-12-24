@@ -7,15 +7,26 @@ class Puzzle
       node = Node.new i
       h[node.head] << node
     end
+    @solution = []
   end
 
   def solve
-    longest_chain = []
-    full_size = @items.values.flatten.size
-    @items.values.flatten.each_with_index do |item, i|
+    return solution unless @solution.empty?
+
+    @items.values.flatten.each do |item|
       current_chain = dfs item
-      longest_chain = current_chain if current_chain.size > longest_chain.size
+      @solution = current_chain if current_chain.size > @solution.size
     end
+
+    solution
+  end
+
+  def solution
+    @solution.map { |node| node.to_s }
+  end
+
+  def formatted_solution
+    solution.reduce { |res, str| res << str[2..] }
   end
 
   private
@@ -64,3 +75,4 @@ filename = "source.txt"
 numbers = File.readlines(filename, chomp: true)
 puzzle = Puzzle.new numbers
 puzzle.solve
+puts puzzle.formatted_solution
