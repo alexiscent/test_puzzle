@@ -3,10 +3,9 @@
 
 class Puzzle
   def initialize(items)
-    @items = items.reduce(Hash.new { |h, k| h[k] = [] }) do |h, i|
+    @items = items.each_with_object(Hash.new { |h, k| h[k] = [] }) do |i, h|
       node = Node.new i
       h[node.head] << node
-      h
     end
   end
   
@@ -25,21 +24,26 @@ class Puzzle
   
   private
 
-  def dfs(node, visited = [])
-    visited << node
+  def dfs(node)
+    node.visited = true
     longest_chain = [node]
-    @items[node.tail].reject {|i| visited.include? i}.each do |neighbor|
-      chain = dfs neighbor, visited
+    @items[node.tail].each do |neighbor|
+      next if neighbor.visited?
+
+      chain = dfs neighbor
       longest_chain = [node] + chain if chain.size + 1 > longest_chain.size
     end
-    visited.pop
+    node.visited = false
     longest_chain
   end
 end
 
 class Node 
+  attr_writer :visited
+
   def initialize(item)
     @item = item
+    @visited = false
   end
   
   def head
@@ -52,6 +56,10 @@ class Node
   
   def inspect
     @item
+  end
+
+  def visited?
+    @visited
   end
 end
 
