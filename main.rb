@@ -8,20 +8,16 @@ class Puzzle
       h[node.head] << node
     end
   end
-  
+
   def solve
     longest_chain = []
     full_size = @items.values.flatten.size
     @items.values.flatten.each_with_index do |item, i|
       current_chain = dfs item
-      puts "#{i}/#{full_size}"
-      p current_chain
-      puts
       longest_chain = current_chain if current_chain.size > longest_chain.size
     end
-    p longest_chain
   end
-  
+
   private
 
   def dfs(node)
@@ -38,14 +34,15 @@ class Puzzle
   end
 end
 
-class Node 
+class Node
   attr_writer :visited
+  attr_reader :item
 
   def initialize(item)
-    @item = item
+    @item = item.to_s
     @visited = false
   end
-  
+
   def head
     @item[0, 2].to_sym
   end
@@ -53,8 +50,8 @@ class Node
   def tail
     @item[-2, 2].to_sym
   end
-  
-  def inspect
+
+  def to_s
     @item
   end
 
