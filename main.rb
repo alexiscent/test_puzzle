@@ -1,10 +1,13 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require "optparse"
+
 class Puzzle
-  def initialize(items)
+  def initialize(items, options)
+    @options = options.dup.freeze
     @items = items.each_with_object(Hash.new { |h, k| h[k] = [] }) do |i, h|
-      node = Node.new i
+      node = Node.new i, @options
       h[node.head] << node
     end
     @solution = []
@@ -26,7 +29,7 @@ class Puzzle
   end
 
   def formatted_solution
-    solution.reduce { |res, str| res << str[2..] }
+    solution.reduce { |res, str| res << str[overlap..] }
   end
 
   private
@@ -43,23 +46,28 @@ class Puzzle
     node.visited = false
     longest_chain
   end
+
+  def overlap
+    @options[:overlap]
+  end
 end
 
 class Node
   attr_writer :visited
   attr_reader :item
 
-  def initialize(item)
+  def initialize(item, options)
     @item = item.to_s
     @visited = false
+    @options = options
   end
 
   def head
-    @item[0, 2].to_sym
+    @item[0, overlap].to_sym
   end
 
   def tail
-    @item[-2, 2].to_sym
+    @item[-overlap..].to_sym
   end
 
   def to_s
@@ -69,10 +77,41 @@ class Node
   def visited?
     @visited
   end
+
+  private
+
+  def overlap
+    @options[:overlap]
+  end
 end
 
-filename = "source.txt"
-numbers = File.readlines(filename, chomp: true)
-puzzle = Puzzle.new numbers
-puzzle.solve
-puts puzzle.formatted_solution
+def parse_options
+  options = {filename: "source.txt", overlap: 2}
+  parser = OptionParser.new do |parser|
+    parser.on("-fNAME", "--file NAME", "input file (default: #{options[:filename]})", String) do |filename|
+      options[:filename] = filename
+    end
+    parser.on("-oNUMBER", "--overlap NUMBER", "edge overlap (default: #{options[:overlap]})", Integer) do |overlap|
+      raise RangeError, "overlap is not positive" unless overlap.positive?
+
+      options[:overlap] = overlap
+    end
+  end
+  parser.parse!(into: options)
+  options
+end
+
+begin
+  options = parse_options
+  numbers = File.readlines(options[:filename], chomp: true)
+rescue RangeError, OptionParser::InvalidArgument
+  puts "Overlap must be a positive integer"
+rescue Errno::ENOENT
+  puts "File '#{options[:filename]}' does not exist"
+rescue Errno::EACCES
+  puts "Could not read from '#{options[:filename]}: Permission denied'"
+else
+  puzzle = Puzzle.new numbers, options.slice(:overlap)
+  puzzle.solve
+  puts puzzle.formatted_solution
+end
