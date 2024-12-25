@@ -101,17 +101,19 @@ def parse_options
   options
 end
 
-begin
-  options = parse_options
-  numbers = File.readlines(options[:filename], chomp: true)
-rescue RangeError, OptionParser::InvalidArgument
-  puts "Overlap must be a positive integer"
-rescue Errno::ENOENT
-  puts "File '#{options[:filename]}' does not exist"
-rescue Errno::EACCES
-  puts "Could not read from '#{options[:filename]}: Permission denied'"
-else
-  puzzle = Puzzle.new numbers, options.slice(:overlap)
-  puzzle.solve
-  puts puzzle.formatted_solution
+if __FILE__ == $0
+  begin
+    options = parse_options
+    numbers = File.readlines(options[:filename], chomp: true)
+  rescue RangeError, OptionParser::InvalidArgument
+    puts "Overlap must be a positive integer"
+  rescue Errno::ENOENT
+    puts "File '#{options[:filename]}' does not exist"
+  rescue Errno::EACCES
+    puts "Could not read from '#{options[:filename]}: Permission denied'"
+  else
+    puzzle = Puzzle.new numbers, options.slice(:overlap)
+    puzzle.solve
+    puts puzzle.formatted_solution
+  end
 end
