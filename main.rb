@@ -41,7 +41,7 @@ class Puzzle
       next if neighbor.visited?
 
       chain = dfs neighbor
-      longest_chain = [node] + chain if chain.size + 1 > longest_chain.size
+      longest_chain = chain.prepend(node) if chain.size + 1 > longest_chain.size
     end
     node.visited = false
     longest_chain
@@ -63,11 +63,11 @@ class Node
   end
 
   def head
-    @item[0, overlap].to_sym
+    @head ||= @item[0, overlap].to_sym
   end
 
   def tail
-    @item[-overlap..].to_sym
+    @tail ||= @item[-overlap..].to_sym
   end
 
   def to_s
