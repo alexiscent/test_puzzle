@@ -6,7 +6,7 @@ require "optparse"
 class Puzzle
   def initialize(items, **options)
     @options = options
-    @items = items.each_with_object(Hash.new { |h, k| h[k] = [] }) do |i, h|
+    @items_by_head = items.each_with_object(Hash.new { |h, k| h[k] = [] }) do |i, h|
       node = Node.new i, **options
       raise ArgumentError, "overlap bigger than some items" if node.item.length < overlap
       h[node.head] << node
@@ -17,7 +17,7 @@ class Puzzle
   def solve
     return solution unless @solution.empty?
 
-    @items.values.flatten.each do |item|
+    @items_by_head.values.flatten.each do |item|
       current_chain = dfs item
       @solution = current_chain if current_chain.size > @solution.size
     end
@@ -38,7 +38,7 @@ class Puzzle
   def dfs(node)
     node.visited = true
     longest_chain = [node]
-    @items[node.tail].each do |neighbor|
+    @items_by_head[node.tail].each do |neighbor|
       next if neighbor.visited?
 
       chain = dfs neighbor
