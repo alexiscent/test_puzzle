@@ -18,7 +18,7 @@ class Puzzle
     return solution unless @solution.empty?
 
     @items_by_head.values.flatten.each do |item|
-      current_chain = dfs item
+      current_chain = find_longest item
       @solution = current_chain if current_chain.size > @solution.size
     end
 
@@ -35,13 +35,14 @@ class Puzzle
 
   private
 
-  def dfs(node)
+  # basically a depth-first search
+  def find_longest(node)
     node.visited = true
     longest_chain = [node]
     @items_by_head[node.tail].each do |neighbor|
       next if neighbor.visited?
 
-      chain = dfs neighbor
+      chain = find_longest neighbor
       longest_chain = chain.prepend(node) if chain.size + 1 > longest_chain.size
     end
     node.visited = false
